@@ -28,7 +28,7 @@ jobs:
 
     - name: Verify SQL File Exists
       run: |
-        ls -la sql/
+        ls -la
 
     - name: Deploy SQL Script to Azure SQL DB
       run: |
@@ -38,4 +38,4 @@ jobs:
         -U ${{ secrets.SQL_USERNAME }} \
         -P "${{ secrets.SQL_PASSWORD }}" \
         -C \
-        -i sql/database_deployment.sql
+        -i script.sql
