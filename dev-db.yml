@@ -1,0 +1,41 @@
+name: Deploy SQL Script to Dev DB
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-db:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install SQLCMD Tools
+      run: |
+        curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+        curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+        
+        sudo apt-get update
+        
+        sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
+        
+        echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+        source ~/.bashrc
+
+    - name: Verify SQL File Exists
+      run: |
+        ls -la sql/
+
+    - name: Deploy SQL Script to Azure SQL DB
+      run: |
+        /opt/mssql-tools18/bin/sqlcmd \
+        -S ${{ secrets.SQL_SERVER }} \
+        -d ${{ secrets.SQL_DATABASE }} \
+        -U ${{ secrets.SQL_USERNAME }} \
+        -P "${{ secrets.SQL_PASSWORD }}" \
+        -C \
+        -i sql/database_deployment.sql
